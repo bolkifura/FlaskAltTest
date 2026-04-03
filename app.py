@@ -8,3 +8,13 @@ db = TinyDB("db.json")
 users = db.table("users")
 
 User = Query()
+
+@app.route("/")
+def home():
+    if "user" in session:
+        return redirect ("/login")
+    return redirect("/register")
+
+@app.route("")
+
+app.run(debug=True)
