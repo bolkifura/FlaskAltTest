@@ -39,6 +39,7 @@ def login():
             session["user"] = username
             return redirect("/dashboard")
         return render_template("login.html")
+    
 @app.route("/dashboard")
 def dashboard():
     if "user" not in session:
@@ -46,6 +47,12 @@ def dashboard():
     user = users.get(User.username == session["user"])
     note = user.get("note","")
     return render_template("dashboard.html", note = note, uporabnik = session["user"])
+
+@app.route("/saveNote", methods=["POST"])
+def saveNote():
+    note = request.form["note"]
+    users.update({"note": note}, User.username == session["user"])
+    return "Saved"
 
 @app.route("/logout")
 def logout():
