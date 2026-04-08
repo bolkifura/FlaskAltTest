@@ -16,7 +16,7 @@ def home():
     return redirect("/login")
 
 @app.route("/register", methods =["GET", "POST"])
-def dashboard():
+def register():
     if request.method == "POST":
         username = request.form["username"]
         password = request.form["password"]
@@ -28,8 +28,9 @@ def dashboard():
         return redirect("/login")
     return render_template("register.html")
 
-@app.route("/register.html")
-def register():
+@app.route("/login.html")
+def login():
+
 
 app.run(debug=True)
 
