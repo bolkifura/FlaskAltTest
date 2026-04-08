@@ -28,7 +28,7 @@ def register():
         return redirect("/login")
     return render_template("register.html")
 
-@app.route("/login")
+@app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
         username = request.form["username"]
@@ -38,7 +38,7 @@ def login():
         if user and user["password"] == password:
             session["user"] = username
             return redirect("/dashboard")
-        return render_template("login.html")
+    return render_template("login.html")
     
 @app.route("/dashboard")
 def dashboard():
