@@ -15,7 +15,7 @@ def home():
         return redirect ("/dashboard")
     return redirect("/login")
 
-@app.route("/register", methods =["GET", "POST"])
+@app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
         username = request.form["username"]
@@ -30,7 +30,16 @@ def register():
 
 @app.route("/login")
 def login():
+    if request.method == "POST":
+        username = request.form["username"]
+        password = request.form["password"]
 
-
+        user = users.get(User.username == username)
+        if user and user["password"] == password:
+            session["user"] = username
+            return redirect("/dashboard")
+        return render_template("login.html")
+#@app.route("/dashboard")
+#def dashboard():
 app.run(debug=True)
 
