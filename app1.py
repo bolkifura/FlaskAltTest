@@ -46,5 +46,11 @@ def dashboard():
     user = users.get(User.username == session["user"])
     note = user.get("note","")
     return render_template("dashboard.html", note = note, uporabnik = session["user"])
+
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect("/login")
+
 app.run(debug=True)
 
