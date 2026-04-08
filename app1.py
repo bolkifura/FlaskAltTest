@@ -39,7 +39,12 @@ def login():
             session["user"] = username
             return redirect("/dashboard")
         return render_template("login.html")
-#@app.route("/dashboard")
-#def dashboard():
+@app.route("/dashboard")
+def dashboard():
+    if "user" not in session:
+        return redirect("/login")
+    user = users.get(User.username == session["user"])
+    note = user.get("note","")
+    return render_template("dashboard.html", note = note, uporabnik = session["user"])
 app.run(debug=True)
 
