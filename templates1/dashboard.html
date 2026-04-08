@@ -2,6 +2,7 @@
 <html>
 <head>
     <title>Dashboard</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 </head>
 <body>
     <h1>Dashboard</h1><br>
@@ -11,5 +12,26 @@
     <p id="status"></p><br>
 
     <a href="/logout">Odjavi</a>
+    
+<script>
+function saveNote() {
+    var noteText = document.getElementById("note").value;
+
+    $.ajax({
+        url: "/saveNote",
+        method: "POST",
+        data: {
+            note: noteText
+        },
+        success: function (result) {
+            document.getElementById("status").innerText = "Shranjeno!";
+        },
+        error: function () {
+            document.getElementById("status").innerText = "Napaka!";
+        }
+    });
+}
+</script>
+
 </body>
 </html>
