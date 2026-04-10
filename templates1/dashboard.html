@@ -12,7 +12,7 @@
     <p id="status"></p><br>
 
     <a href="/logout">Odjavi</a>
-    
+
 <script>
 function saveNote() {
     var noteText = document.getElementById("note").value;
@@ -24,10 +24,10 @@ function saveNote() {
             note: noteText
         },
         success: function (result) {
-            document.getElementById("status").innerText = "Shranjeno!";
+            document.getElementById("status").innerText = "Shranjeno";
         },
         error: function () {
-            document.getElementById("status").innerText = "Napaka!";
+            document.getElementById("status").innerText = "Napaka";
         }
     });
 }

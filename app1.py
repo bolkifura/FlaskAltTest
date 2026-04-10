@@ -45,13 +45,18 @@ def dashboard():
     if "user" not in session:
         return redirect("/login")
     user = users.get(User.username == session["user"])
-    note = user.get("note","")
-    return render_template("dashboard.html", note = note, uporabnik = session["user"])
+    notes = user.get("notes", [])
+    return render_template("dashboard.html", notes=notes, uporabnik=session["user"])
 
 @app.route("/saveNote", methods=["POST"])
 def saveNote():
-    note = request.form["note"]
-    users.update({"note": note}, User.username == session["user"])
+    note_title = request.form["title"]
+    note_content = request.form["note"]
+    user = users.get(User.username == session["user"])
+    notes = user.get("notes", [])  
+    notes.append({"title": note_title, "content": note_content})
+    users.update({"notes": notes}, User.username == session["user"])
+    return redirect("/dashboard")
     return "Saved"
 
 @app.route("/logout")
