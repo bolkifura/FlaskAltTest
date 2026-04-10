@@ -1,1 +1,1 @@
-{"users": {"1": {"username": "abc", "password": "abc", "note": "alo halo "}, "2": {"username": "mustard", "password": "mango", "note": "sigma"}, "3": {"username": "ligma", "password": "sus", "note": "ohio boss"}}}
+{"users": {"1": {"username": "abc", "password": "abc", "note": "alo halo "}, "2": {"username": "mustard", "password": "mango", "note": "sigma", "notes": [{"title": "zapisek", "content": "zmaga"}]}, "3": {"username": "ligma", "password": "sus", "note": "ohio boss"}}}
