@@ -80,13 +80,18 @@ def editNote(note_index):
 def clearNoteContent(note_index):
     user = users.get(User.username == session["user"])
     notes = user.get("notes", [])
-
     notes[note_index]["content"] = ""
-
     users.update({"notes": notes}, User.username == session["user"])
-
     return redirect(url_for('editNote', note_index=note_index))
 
+@app.route("/deleteNote/<int:note_index>", methods=["POST"])
+def deleteNote(note_index):
+    user = users.get(User.username == session["user"])
+    notes = user.get("notes", [])
+    notes.pop(note_index)
+    users.update({"notes": notes}, User.username == session["user"])
+    return redirect("/dashboard")
+    
 @app.route("/logout")
 def logout():
     session.clear()
