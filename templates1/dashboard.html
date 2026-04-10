@@ -7,31 +7,25 @@
 <body>
     <h1>Dashboard</h1><br>
 
-    <textarea id="note" cols="30" rows="10">{{note}}</textarea><br>
-    <button onclick="saveNote()">Shrani</button>
-    <p id="status"></p><br>
+    <h2>Moji zapiski:</h2>
+    <ul>
+        {% for note in notes %}
+            <li>
+                <a href="{{ url_for('editNote', note_index=loop.index0) }}">{{ note.title }}</a>
+                <form action="/deleteNote/{{ loop.index0 }}" method="POST" style="display:inline;">
+                    <button type="submit">Izbriši zapisek</button>
+                </form>
+            </li>
+        {% endfor %}
+    </ul>
+
+    <h3>Dodaj nov zapisek:</h3>
+    <form action="/saveNote" method="POST">
+        <input type="text" name="title" placeholder="Naslov zapiska" required><br><br>
+        <textarea name="note" cols="30" rows="10" required></textarea><br><br>
+        <button type="submit">Shrani</button>
+    </form>
 
     <a href="/logout">Odjavi</a>
-
-<script>
-function saveNote() {
-    var noteText = document.getElementById("note").value;
-
-    $.ajax({
-        url: "/saveNote",
-        method: "POST",
-        data: {
-            note: noteText
-        },
-        success: function (result) {
-            document.getElementById("status").innerText = "Shranjeno";
-        },
-        error: function () {
-            document.getElementById("status").innerText = "Napaka";
-        }
-    });
-}
-</script>
-
 </body>
 </html>
