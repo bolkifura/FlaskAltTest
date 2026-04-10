@@ -59,6 +59,23 @@ def saveNote():
     return redirect("/dashboard")
     return "Saved"
 
+@app.route("/editNote/<int:note_index>", methods=["GET", "POST"])
+def editNote(note_index):
+    if "user" not in session:
+        return redirect("/login")
+    
+    user = users.get(User.username == session["user"])
+    notes = user.get("notes", [])
+    note = notes[note_index]
+
+    if request.method == "POST":
+        note["title"] = request.form["title"]
+        note["content"] = request.form["note"]
+        users.update({"notes": notes}, User.username == session["user"])
+        return redirect("/dashboard")
+
+    return render_template("edit_note.html", note=note, note_index=note_index)
+
 @app.route("/logout")
 def logout():
     session.clear()
