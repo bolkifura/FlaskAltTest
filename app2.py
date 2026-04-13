@@ -7,6 +7,8 @@ app.secret_key = "vilisesmili"
 db = TinyDB("db2.json")
 users = db.table("users")
 
+User = Query()
+
 @app.route("/")
 def home():
     if "user" in session:
