@@ -88,6 +88,18 @@ def addPost():
     users.update({"posts": posts}, User.username == session["user"])
     return redirect("/dashboard")
 
+@app.route("/likePost", methods=["POST"])
+def likePost():
+    index = int(request.form["index"])
+    author = request.form["author"]
+
+    user = users.get(User.username == author)
+    posts = user.get("posts", [])
+
+    posts[index]["likes"] += 1
+
+    users.update({"posts": posts}, User.username == author)
+    return {"success": True, "likes": posts[index]["likes"]}
 
 @app.route("/logout")
 def logout():
