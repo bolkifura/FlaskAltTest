@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chat App</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+</head>
+<body>
+<h1>Global Chat</h1>
+<p>Prijavljen: {{ uporabnik }}</p>
+<hr>
+<div id="chatBox">
+{% for message in messages %}
+<div style="border:1px solid black; padding:10px; margin-bottom:10px;">
+    <b>{{ message.author }}</b>
+    <p>{{ message.text }}</p>
+    {% if message.author == uporabnik %}
+    <button 
+        class="deleteBtn"
+        data-id="{{ loop.index0 }}"
+    >
+        Izbriši
+    </button>
+    {% endif %}
+</div>
+{% endfor %}
+</div>
+<hr>
+<h2>Pošlji sporočilo</h2>
+<input
+    type="text"
+    id="messageInput"
+    placeholder="Napiši sporočilo..."
+>
+<button id="sendBtn">
+    Pošlji
+</button>
+<br><br>
+<a href="/logout">Odjavi</a>
+<script>
+function loadMessages() {
+    $.get("/getMessages", function(data) {
+        let html = "";
+        for (let i = 0; i < data.messages.length; i++) {
+            let msg = data.messages[i];
+            html += `
+            <div style="border:1px solid black; padding:10px; margin-bottom:10px;">
+                <b>${msg.author}</b>
+                <p>${msg.text}</p>
+            `;
+            if (msg.author === "{{ uporabnik }}") {
+                html += `
+                <button
+                    class="dynamicDeleteBtn"
+                    data-id="${i}"
+                >
+                    Izbriši
+                </button>
+                `;
+            }
+            html += `</div>`;
+        }
+        $("#chatBox").html(html);
+    });
+}
+function sendMessage() {
+    let text = $("#messageInput").val();
+    $.post(
+        "/sendMessage",
+        {
+            text: text
+        },
+        function(response) {
+            if (response.success) {
+                $("#messageInput").val("");
+                loadMessages();
+            }
+        }
+    );
+}
+
+function deleteMessage(index) {
+    $.post(
+        "/deleteMessage",
+        {
+            index: index
+        },
+        function(response) {
+            if (response.success) {
+                loadMessages();
+            }
+        }
+    );
+}
+$("#sendBtn").click(function() {
+    sendMessage();
+});
+$(document).on("click", ".deleteBtn", function() {
+    let index = $(this).data("id");
+    deleteMessage(index);
+});
+$(document).on("click", ".dynamicDeleteBtn", function() {
+    let index = $(this).data("id");
+    deleteMessage(index);
+});
+setInterval(loadMessages, 3000);
+</script>
+</body>
+</html>
