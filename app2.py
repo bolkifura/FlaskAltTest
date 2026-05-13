@@ -70,23 +70,18 @@ def dashboard():
 def addPost():
     if "user" not in session:
         return redirect("/login")
-
     text = request.form["text"]
     image_file = request.files["image"]
-
     image_data = ""
     if image_file:
         image_data = base64.b64encode(image_file.read()).decode("utf-8")
-
     user = users.get(User.username == session["user"])
     posts = user.get("posts", [])
-
     posts.append({
         "text": text,
         "image": image_data,
         "likes": 0
     })
-
     users.update({"posts": posts}, User.username == session["user"])
     return redirect("/dashboard")
 
@@ -94,31 +89,22 @@ def addPost():
 def likePost():
     index = int(request.form["index"])
     author = request.form["author"]
-
     user = users.get(User.username == author)
     posts = user.get("posts", [])
-
     posts[index]["likes"] += 1
-
     users.update({"posts": posts}, User.username == author)
     return {"success": True, "likes": posts[index]["likes"]}
 
 @app.route("/deletePost", methods=["POST"])
 def deletePost():
-
     if "user" not in session:
         return {"success": False}
-
     index = int(request.form["index"])
-
     user = users.get(User.username == session["user"])
     posts = user.get("posts", [])
-
     if index < len(posts):
         posts.pop(index)
-
     users.update({"posts": posts}, User.username == session["user"])
-
     return {"success": True}
 
 @app.route("/logout")
