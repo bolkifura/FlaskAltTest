@@ -49,20 +49,22 @@ def login():
 def dashboard():
     if "user" not in session:
         return redirect("/login")
-
     all_users = users.all()
     all_posts = []
-
     for u in all_users:
-        for p in u.get("posts", []):
+        for i, p in enumerate(u.get("posts", [])):
             all_posts.append({
                 "author": u["username"],
                 "text": p["text"],
                 "image": p["image"],
-                "likes": p.get("likes", 0)
+                "likes": p.get("likes", 0),
+                "index": i
             })
-
-    return render_template("dashboard.html", posts=all_posts, uporabnik=session["user"])
+    return render_template(
+        "dashboard.html",
+        posts=all_posts,
+        uporabnik=session["user"]
+    )
 
 @app.route("/addPost", methods=["POST"])
 def addPost():
@@ -100,6 +102,24 @@ def likePost():
 
     users.update({"posts": posts}, User.username == author)
     return {"success": True, "likes": posts[index]["likes"]}
+
+@app.route("/deletePost", methods=["POST"])
+def deletePost():
+
+    if "user" not in session:
+        return {"success": False}
+
+    index = int(request.form["index"])
+
+    user = users.get(User.username == session["user"])
+    posts = user.get("posts", [])
+
+    if index < len(posts):
+        posts.pop(index)
+
+    users.update({"posts": posts}, User.username == session["user"])
+
+    return {"success": True}
 
 @app.route("/logout")
 def logout():

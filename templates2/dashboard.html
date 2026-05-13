@@ -5,52 +5,87 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 </head>
 <body>
-
 <h1>Socialna platforma</h1>
-<p>{{ uporabnik }}</p>
-
+<p>Prijavljen: {{ uporabnik }}</p>
 <h2>Nova objava</h2>
 <form action="/addPost" method="POST" enctype="multipart/form-data">
-    <textarea name="text" placeholder="text" required></textarea><br><br>
-    <input type="file" name="image"><br><br>
-    <button type="submit">Objavi</button>
+    <textarea 
+        name="text" 
+        placeholder="Napiši objavo..."
+        required
+    ></textarea>
+    <br><br>
+    <input type="file" name="image">
+    <br><br>
+    <button type="submit">
+        Objavi
+    </button>
 </form>
-
 <hr>
-
 <h2>Objave uporabnikov</h2>
-
 {% for post in posts %}
 <div style="border:1px solid black; padding:10px; margin-bottom:10px;">
-    <b>{{ post.author }}</b><br>
+    <b>{{ post.author }}</b>
     <p>{{ post.text }}</p>
-
     {% if post.image %}
-        <img src="data:image/png;base64,{{ post.image }}" width="200">
+        <img 
+            src="data:image/png;base64,{{ post.image }}" 
+            width="200"
+        >
     {% endif %}
-
     <br><br>
-    <button class="likeBtn" data-author="{{ post.author }}" data-index="{{ loop.index0 }}">
+    <button 
+        class="likeBtn"
+        data-author="{{ post.author }}"
+        data-index="{{ post.index }}"
+    >
         ❤️ Like ({{ post.likes }})
     </button>
+    {% if post.author == uporabnik %}
+    <button 
+        class="deleteBtn"
+        data-index="{{ post.index }}"
+    >
+        Izbriši objavo
+    </button>
+    {% endif %}
 </div>
 {% endfor %}
-
+<br>
+<a href="/logout">Odjavi</a>
 <script>
 $(".likeBtn").click(function() {
     let author = $(this).data("author");
     let index = $(this).data("index");
     let btn = $(this);
-
-    $.post("/likePost", {author: author, index: index}, function(response) {
-        if (response.success) {
-            btn.text("❤️ Like (" + response.likes + ")");
+    $.post("/likePost",
+        {
+            author: author,
+            index: index
+        },
+        function(response) {
+            if (response.success) {
+                btn.text(
+                    "❤️ Like (" + response.likes + ")"
+                );
+            }
         }
-    });
+    );
+});
+$(".deleteBtn").click(function() {
+    let index = $(this).data("index");
+    let postDiv = $(this).parent();
+    $.post("/deletePost",
+        {
+            index: index
+        },
+        function(response) {
+            if (response.success) {
+                postDiv.remove();
+            }
+        }
+    );
 });
 </script>
-
-<a href="/logout">Odjavi</a>
-
 </body>
 </html>
