@@ -86,11 +86,14 @@ def clearNoteContent(note_index):
 
 @app.route("/deleteNote/<int:note_index>", methods=["POST"])
 def deleteNote(note_index):
+    if "user" not in session:
+        return {"success": False}
     user = users.get(User.username == session["user"])
     notes = user.get("notes", [])
-    notes.pop(note_index)
-    users.update({"notes": notes}, User.username == session["user"])
-    return redirect("/dashboard")
+    if note_index < len(notes):
+        notes.pop(note_index)
+        users.update({"notes": notes}, User.username == session["user"])
+    return {"success": True}
     
 @app.route("/logout")
 def logout():
