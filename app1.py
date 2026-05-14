@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, session, url_for 
+from flask import Flask, render_template, request, redirect, session, url_for # url_for omogoča ustvarjanje URL-jev za funkcije, kar je uporabno pri preusmerjanju in povezavah v HTML-ju
 from tinydb import TinyDB, Query # Query omogoča iskanje po bazi podatkov
 
 app = Flask(__name__, template_folder="templates1") # Ustvari flask app
