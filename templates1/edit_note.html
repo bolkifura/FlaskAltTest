@@ -4,15 +4,15 @@
     <title>Uredi zapisek</title>
 </head>
 <body>
-    <h1>Uredi zapisek: {{ note.title }}</h1><br>
+    <h1>Uredi zapisek: {{ note.title }}</h1><br> <!-- Naslov zapiska -->
 
     <form method="POST">
-        <input type="text" name="title" value="{{ note.title }}" required><br><br>
-        <textarea name="note" cols="30" rows="10" required>{{ note.content }}</textarea><br><br>
-        <button type="submit">Shrani spremembe</button>
+        <input type="text" name="title" value="{{ note.title }}" required><br><br> <!-- Polje za naslov zapiska -->
+        <textarea name="note" cols="30" rows="10" required>{{ note.content }}</textarea><br><br> <!-- Polje za vsebino zapiska -->
+        <button type="submit">Shrani spremembe</button> <!-- Gumb za shranjevanje sprememb -->
     </form>
 
-        <form action="/clearNoteContent/{{ note_index }}" method="POST">
+        <form action="/clearNoteContent/{{ note_index }}" method="POST"> <!-- Gumb za počiščenje vsebine zapiska -->
         <button type="submit">Počisti</button>
     </form>
 

@@ -6,12 +6,12 @@
 </head>
 <body>
     <h1>Dashboard</h1>
-    <h2>Pozdravljen, {{ uporabnik }}</h2>
+    <h2>Pozdravljen, {{ uporabnik }}</h2> <!--Ime vzame iz sessiona in ga prikaže--> 
     <h2>Moji zapiski:</h2>
     <ul>
-        {% for note in notes %}
-        <li id="note-{{ loop.index0 }}">
-            <a href="{{ url_for('editNote', note_index=loop.index0) }}">
+        {% for note in notes %} <!--Za vsak note v notes, ki smo jih poslali iz app.py, ustvari list item-->
+        <li id="note-{{ loop.index0 }}"> <!-- loop.index0 je indeks trenutnega nota, ki se začne z 0, in ga uporabimo za id elementa, da ga lahko kasneje izbrišemo z JavaScriptom -->
+            <a href="{{ url_for('editNote', note_index=loop.index0) }}"> <!-- link za urejanje zapiska -->
                 {{ note.title }}
             </a>
             <button class="delete-btn" data-id="{{ loop.index0 }}">
@@ -32,19 +32,19 @@
     <br>
     <a href="/logout">Odjavi</a>
     <script>
-        $(".delete-btn").click(function() {
-            let noteIndex = $(this).data("id");
-            $.ajax({
-                url: "/deleteNote/" + noteIndex,
-                type: "POST",
-                success: function(response) {
-                    if (response.success) {
-                        $("#note-" + noteIndex).remove();
+        $(".delete-btn").click(function() { /* Gumb za brisanje zapiska */
+            let noteIndex = $(this).data("id"); /* Pridobi indeks nota iz data atributa gumba, da vemo kateri note želimo izbrisati */
+            $.ajax({ /* Pošlje AJAX POST zahtevek na /deleteNote/<note_index>, da izbriše note iz baze, brez osveževanja strani */
+                url: "/deleteNote/" + noteIndex,  /* URL, kamor pošljemo zahtevek, vključuje indeks nota, ki ga želimo izbrisati */
+                type: "POST", /* Metoda POST, ker pošiljamo podatke na server, da se izvede brisanje */
+                success: function(response) { /* Funkcija, ki se izvede, če je zahtevek uspešen, response je odgovor, ki ga vrne server (success) */
+                    if (response.success) { /* Preveri, če je brisanje uspelo, response.success je true, če je brisanje uspelo, in false, če ni */
+                        $("#note-" + noteIndex).remove(); /* Odstrani HTML element z id-jem note-<note_index>, da se note odstrani iz strani brez osveževanja */
                     } else {
-                        alert("Napaka pri brisanju.");
+                        alert("Napaka pri brisanju."); /* Prikaže alert, če brisanje ni uspelo, lahko se zgodi, če uporabnik ni prijavljen ali če je prišlo do napake na serverju */
                     }
                 },
-                error: function() {
+                error: function() { /* Funkcija, ki se izvede, če je prišlo do napake pri AJAX klicu, na primer, če server ni dosegljiv */
                     alert("Napaka pri AJAX klicu.");
                 }
             });
