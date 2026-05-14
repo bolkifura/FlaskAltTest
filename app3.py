@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, redirect, session
 from tinydb import TinyDB, Query
 
 app = Flask(__name__, template_folder="templates3")
-app.secret_key = "chatsecret"
+app.secret_key = "sigmabolka"
 
 DB = TinyDB("chatdb.json")
 users = DB.table("users")
