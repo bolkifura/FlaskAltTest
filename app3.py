@@ -57,7 +57,7 @@ def sendMessage():
 
 @app.route("/getMessages")
 def getMessages():
-    all_messages = messages.all() # Pridobi vsa sporočila iz baze, da jih lahko prikažemo na chat strani, to funkcijo bomo klicali z JavaScriptom vsake 2 sekundi, da dobimo nova sporočila brez osveževanja strani
+    all_messages = messages.all() # Pridobi vsa sporočila iz baze, da jih lahko prikažemo na chat strani, to funkcijo bomo klicali z JavaScriptom vsake 3 sekundi, da dobimo nova sporočila brez osveževanja strani
     return {"messages": all_messages} # Vrne JSON odgovor z vsemi sporočili, da dobimo nova sporočila brez osveževanja strani
 
 @app.route("/deleteMessage", methods=["POST"]) # Post pošlje podatke v bazo
