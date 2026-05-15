@@ -1,1 +1,1 @@
-{"users": {"1": {"username": "mango", "password": "mustard"}}, "messages": {"1": {"author": "mango", "text": "oj"}}}
+{"users": {"1": {"username": "mango", "password": "mustard"}, "2": {"username": "sigma", "password": "bolka"}}, "messages": {"1": {"author": "mango", "text": "oj"}, "2": {"author": "sigma", "text": "hola"}}}
