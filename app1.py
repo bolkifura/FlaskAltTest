@@ -1,103 +1,296 @@
-from flask import Flask, render_template, request, redirect, session, url_for # url_for omogoča ustvarjanje URL-jev za funkcije, kar je uporabno pri preusmerjanju in povezavah v HTML-ju
-from tinydb import TinyDB, Query # Query omogoča iskanje po bazi podatkov
+from flask import Flask, render_template, request, redirect, session, url_for
+from tinydb import TinyDB, Query
 
-app = Flask(__name__, template_folder="templates1") # Ustvari flask app
-app.secret_key = "cebronjonbombon" # Za sessione, cookies, varnost
+# Flask app
+app = Flask(__name__, template_folder="templates1")
 
+# Secret key
+app.secret_key = "cebronjonbombon"
+
+# Baza
 db = TinyDB("db.json")
-users = db.table("users") # V bazi ustvarimo tabelo "users"
 
-User = Query() # Omogoča iskanje po tabeli "users" z Query
+# Tabela uporabnikov
+users = db.table("users")
 
-@app.route("/") 
+# Query objekt
+User = Query()
+
+
+# HOME
+@app.route("/")
 def home():
-    if "user" in session: # Preveri, če je uporabnik v sessionu
-        return redirect ("/dashboard") # Preusmeri na dashboard, če je prijavljen
-    return redirect("/login") # Preusmeri na login, če ni prijavljen
 
-@app.route("/register", methods=["GET", "POST"]) # Get prikaže stran in zahteva podatke, Post pošlje podatke v bazo
+    # Če je uporabnik prijavljen
+    if "user" in session:
+
+        return redirect("/dashboard")
+
+    # Če ni prijavljen
+    return redirect("/login")
+
+
+# REGISTER
+@app.route("/register", methods=["GET", "POST"])
 def register():
-    if request.method == "POST": # Če submitaš 
-        username = request.form["username"] # Pridobi username iz html
-        password = request.form["password"] # Pridobi password iz html
 
-        if users.search(User.username == username): # Preveri, če uporabnik že obstaja v bazi
+    if request.method == "POST":
+
+        username = request.form["username"]
+
+        password = request.form["password"]
+
+        # Preveri če uporabnik obstaja
+        if users.search(User.username == username):
+
             return "Uporabnik obstaja"
 
-        users.insert({"username": username, "password": password, "note": ""}) # Vstavi novega uporabnika v bazo
-        return redirect("/login") # Preusmeri na login
-    return render_template("register.html") # Prikaže register.html
+        # Dodaj uporabnika
+        users.insert({
 
-@app.route("/login", methods=["GET", "POST"]) # Get prikaže stran in zahteva podatke, Post pošlje podatke v bazo
+            "username": username,
+
+            "password": password,
+
+            "notes": []
+
+        })
+
+        return redirect("/login")
+
+    return render_template("register.html")
+
+
+# LOGIN
+@app.route("/login", methods=["GET", "POST"])
 def login():
-    if request.method == "POST": # Če submitaš 
-        username = request.form["username"] # Pridobi username iz html
-        password = request.form["password"] # Pridobi password iz html
 
-        user = users.get(User.username == username) # Pooišče uporabnika v bazi po usernameu
-        if user and user["password"] == password: # Preveri, če uporabnik obstaja in če je geslo pravilno
-            session["user"] = username # Shrani username v session, da lahko preverjamo, če je uporabnik prijavljen
-            return redirect("/dashboard") # Preusmeri na dashboard
-    return render_template("login.html") # Prikaže login.html
-    
+    if request.method == "POST":
+
+        username = request.form["username"]
+
+        password = request.form["password"]
+
+        # Poišče uporabnika
+        user = users.get(User.username == username)
+
+        # Preveri geslo
+        if user and user["password"] == password:
+
+            # Shrani v session
+            session["user"] = username
+
+            return redirect("/dashboard")
+
+    return render_template("login.html")
+
+
+# DASHBOARD
 @app.route("/dashboard")
 def dashboard():
-    if "user" not in session: # Preveri, če je uporabnik v sessionu
-        return redirect("/login") # Preusmeri na login
-    user = users.get(User.username == session["user"]) # Poišče uporabnika v bazi po usernameu
-    notes = user.get("notes", []) # Pridobi note iz baze, če ni note, vrne prazen seznam
-    return render_template("dashboard.html", notes=notes, uporabnik=session["user"]) # Prikaže dashboard.html in pošlje notes in username, da jih lahko uporabimo v html
 
-@app.route("/saveNote", methods=["POST"]) # Post pošlje podatke v bazo
+    # Če ni prijavljen
+    if "user" not in session:
+
+        return redirect("/login")
+
+    # Najde uporabnika
+    user = users.get(
+
+        User.username == session["user"]
+
+    )
+
+    # Pridobi zapiske
+    notes = user.get("notes", [])
+
+    return render_template(
+
+        "dashboard.html",
+
+        notes=notes,
+
+        uporabnik=session["user"]
+
+    )
+
+
+# SHRANI NOTE
+@app.route("/saveNote", methods=["POST"])
 def saveNote():
-    note_title = request.form["title"] # Pridobi title iz html
-    note_content = request.form["note"] # Pridobi content iz html
-    user = users.get(User.username == session["user"]) # Poišče uporabnika v bazi po usernameu
-    notes = user.get("notes", [])  # Pridobi note iz baze, če ni note, vrne prazen seznam
-    notes.append({"title": note_title, "content": note_content}) # Doda nov note v seznam notes
-    users.update({"notes": notes}, User.username == session["user"]) # Posodobi notes v bazi za trenutnega uporabnika
-    return redirect("/dashboard") # Preusmeri na dashboard
 
-@app.route("/editNote/<int:note_index>", methods=["GET", "POST"]) # Get prikaže stran in zahteva podatke, Post pošlje podatke v bazo    #note_index je indeks nota, ki ga želimo urediti
+    # Naslov
+    note_title = request.form["title"]
+
+    # Vsebina
+    note_content = request.form["note"]
+
+    # Najde uporabnika
+    user = users.get(
+
+        User.username == session["user"]
+
+    )
+
+    # Obstoječi notes
+    notes = user.get("notes", [])
+
+    # Dodaj nov note
+    notes.append({
+
+        "title": note_title,
+
+        "content": note_content
+
+    })
+
+    # Posodobi bazo
+    users.update(
+
+        {"notes": notes},
+
+        User.username == session["user"]
+
+    )
+
+    return redirect("/dashboard")
+
+
+# EDIT NOTE
+@app.route("/editNote/<int:note_index>", methods=["GET", "POST"])
 def editNote(note_index):
-    if "user" not in session: # Preveri, če je uporabnik v sessionu
-        return redirect("/login") # Preusmeri na login
-    
-    user = users.get(User.username == session["user"]) # Poišče uporabnika v bazi po usernameu
-    notes = user.get("notes", []) # Pridobi note iz baze, če ni note, vrne prazen seznam
-    note = notes[note_index] # Pridobi note, ki ga želimo urediti iz seznama notes po indeksu
 
-    if request.method == "POST": # Če shraniš
-        note["title"] = request.form["title"] # Posodobi title nota z novim titleom iz html
-        note["content"] = request.form["note"] # Posodobi content nota z novim contentom iz html
-        users.update({"notes": notes}, User.username == session["user"]) # Shrani v bazo posodobljen seznam notes za trenutnega uporabnika
-        return redirect("/dashboard") # Preusmeri na dashboard
+    # Če ni prijavljen
+    if "user" not in session:
 
-    return render_template("edit_note.html", note=note, note_index=note_index) # Prikaže edit_note.html in pošlje note, da jih lahko uporabimo v html
+        return redirect("/login")
 
-@app.route("/clearNoteContent/<int:note_index>", methods=["POST"]) # Post pošlje podatke v bazo
+    # Najde uporabnika
+    user = users.get(
+
+        User.username == session["user"]
+
+    )
+
+    # Vsi notes
+    notes = user.get("notes", [])
+
+    # Izbran note
+    note = notes[note_index]
+
+    # Če shrani spremembe
+    if request.method == "POST":
+
+        note["title"] = request.form["title"]
+
+        note["content"] = request.form["note"]
+
+        # Posodobi bazo
+        users.update(
+
+            {"notes": notes},
+
+            User.username == session["user"]
+
+        )
+
+        return redirect("/dashboard")
+
+    return render_template(
+
+        "edit_note.html",
+
+        note=note,
+
+        note_index=note_index
+
+    )
+
+
+# CLEAR NOTE
+@app.route("/clearNoteContent/<int:note_index>", methods=["POST"])
 def clearNoteContent(note_index):
-    user = users.get(User.username == session["user"]) # Poišče uporabnika v bazi po usernameu
-    notes = user.get("notes", []) # Pridobi note iz baze, če ni note, vrne prazen seznam
-    notes[note_index]["content"] = "" # Počisti content nota, ki ga želimo urediti iz seznama notes po indeksu
-    users.update({"notes": notes}, User.username == session["user"]) # Posodobi notes v bazi za trenutnega uporabnika
-    return redirect(url_for('editNote', note_index=note_index)) # Preusmeri nazaj na editNote, da lahko uporabnik vidi, da je content počisten
 
-@app.route("/deleteNote/<int:note_index>", methods=["POST"]) # Post pošlje podatke v bazo, note_index je indeks nota, ki ga želimo izbrisati
+    # Najde uporabnika
+    user = users.get(
+
+        User.username == session["user"]
+
+    )
+
+    # Vsi notes
+    notes = user.get("notes", [])
+
+    # Počisti content
+    notes[note_index]["content"] = ""
+
+    # Posodobi bazo
+    users.update(
+
+        {"notes": notes},
+
+        User.username == session["user"]
+
+    )
+
+    return redirect(
+
+        url_for(
+
+            "editNote",
+
+            note_index=note_index
+
+        )
+    )
+
+
+# DELETE NOTE
+@app.route("/deleteNote/<int:note_index>", methods=["POST"])
 def deleteNote(note_index):
-    if "user" not in session: # Preveri, če je uporabnik v sessionu
-        return {"success": False} # Vrne JSON odgovor, da brisanje ni uspelo, lahko ga uporabimo v JavaScriptu, da prikažemo napako
-    user = users.get(User.username == session["user"]) # Poišče uporabnika v bazi po usernameu
-    notes = user.get("notes", []) # Pridobi note iz baze, če ni note, vrne prazen seznam
-    if note_index < len(notes): # Preveri, če je indeks nota, ki ga želimo izbrisati, manjši od dolžine seznama notes, da preprečimo napake
-        notes.pop(note_index) # Odstrani note, ki ga želimo izbrisati iz seznama notes po indeksu
-        users.update({"notes": notes}, User.username == session["user"]) # Posodobi notes v bazi za trenutnega uporabnika
-    return {"success": True} # Vrne JSON odgovor, da je brisanje uspelo, lahko ga uporabimo v JavaScriptu, da odstranimo note iz strani brez osveževanja
-    
+
+    # Če ni prijavljen
+    if "user" not in session:
+
+        return {"success": False}
+
+    # Najde uporabnika
+    user = users.get(
+
+        User.username == session["user"]
+
+    )
+
+    # Vsi notes
+    notes = user.get("notes", [])
+
+    # Če note obstaja
+    if note_index < len(notes):
+
+        # Izbriši note
+        notes.pop(note_index)
+
+        # Posodobi bazo
+        users.update(
+
+            {"notes": notes},
+
+            User.username == session["user"]
+
+        )
+
+    return {"success": True}
+
+
+# LOGOUT
 @app.route("/logout")
 def logout():
-    session.clear() # Počisti session, da se uporabnik odjavi
-    return redirect("/login") # Preusmeri na login
 
-app.run(debug=True) # Zaženi flask app, tako da lahko vidimo napake in avtomatsko osveževanje strani pri spremembah v kodi
+    # Počisti session
+    session.clear()
 
+    return redirect("/login")
+
+
+# Zagon aplikacije
+app.run(debug=True)

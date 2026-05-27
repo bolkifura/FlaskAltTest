@@ -108,7 +108,7 @@
 
 <script>
 
-/* Like */
+/* LIKE / UNLIKE */
 $(".likeBtn").click(function() {
 
     let author = $(this).data("author");
@@ -118,6 +118,7 @@ $(".likeBtn").click(function() {
     let btn = $(this);
 
     $.post(
+
         "/likePost",
 
         {
@@ -129,37 +130,23 @@ $(".likeBtn").click(function() {
 
             if (response.success) {
 
-                /* Posodobi število lajkov */
-                btn.text(
-                    "❤️ Like (" + response.likes + ")"
-                );
-            }
-        }
-    );
-});
+                /* Če je like */
+                if (response.liked) {
 
-/* Brisanje objave */
-$(".deleteBtn").click(function() {
+                    btn.text(
+                        "💔 Unlike (" + response.likes + ")"
+                    );
 
-    let index = $(this).data("index");
+                }
 
-    let postDiv = $(this).parent();
+                /* Če je unlike */
+                else {
 
-    $.post(
+                    btn.text(
+                        "❤️ Like (" + response.likes + ")"
+                    );
 
-        "/deletePost",
-
-        {
-            index: index
-        },
-
-        function(response) {
-
-            if (response.success) {
-
-                /* Odstrani objavo */
-                postDiv.remove();
-
+                }
             }
         }
     );
