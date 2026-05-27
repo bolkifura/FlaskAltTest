@@ -1,1 +1,1 @@
-{"users": {"1": {"username": "mango", "password": "mustard"}, "2": {"username": "sigma", "password": "bolka"}}, "messages": {"2": {"author": "sigma", "text": "hola"}, "3": {"author": "mango", "text": "amigos"}}}
+{"users": {"1": {"username": "mango", "password": "mustard"}, "2": {"username": "sigma", "password": "bolka"}, "3": {"username": "a", "password": "a"}}, "messages": {"2": {"author": "sigma", "text": "hola"}, "3": {"author": "mango", "text": "amigos"}, "4": {"author": "a", "text": "asasa"}}}
