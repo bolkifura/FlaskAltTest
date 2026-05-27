@@ -1,53 +1,100 @@
 <!DOCTYPE html>
 <html>
+
 <head>
+
     <title>Chat App</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script> 
+
+    <!-- jQuery -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
 </head>
+
 <body>
+
 <h1>Global Chat</h1>
-<p>Prijavljen: {{ uporabnik }}</p> <!--Ime vzame iz sessiona in ga prikaže-->
+
+<!-- Trenutni uporabnik -->
+<p>Prijavljen: {{ uporabnik }}</p>
+
 <hr>
+
+<!-- Prostor za sporočila -->
 <div id="chatBox">
-{% for message in messages %} <!--Za vsak message v messages, ki smo jih poslali iz app.py, ustvari div element z vsebino sporočila-->
+
+{% for message in messages %}
+
 <div style="border:1px solid black; padding:10px; margin-bottom:10px;">
-    <b>{{ message.author }}</b> <!-- Prikaže avtorja sporočila, ki je shranjen v bazi skupaj s sporočilom -->
-    <p>{{ message.text }}</p> <!-- Prikaže tekst sporočila, ki je shranjen v bazi skupaj s sporočilom -->
-    {% if message.author == uporabnik %} <!-- Če je avtor sporočila enak trenutnemu uporabniku, prikaži gumb za brisanje sporočila -->
-    <button 
+
+    <!-- Avtor -->
+    <b>{{ message.author }}</b>
+
+    <!-- Besedilo -->
+    <p>{{ message.text }}</p>
+
+    <!-- Če je uporabnik avtor -->
+    {% if message.author == uporabnik %}
+
+    <button
         class="deleteBtn"
         data-id="{{ loop.index0 }}"
-    > <!-- Če je avtor sporočila enak trenutnemu uporabniku, prikaži gumb za brisanje sporočila -->
+    >
         Izbriši
     </button>
+
     {% endif %}
+
 </div>
+
 {% endfor %}
-</div> <!-- Za vsak message v messages -->
+
+</div>
+
 <hr>
+
 <h2>Pošlji sporočilo</h2>
+
+<!-- Input -->
 <input
     type="text"
     id="messageInput"
     placeholder="Napiši sporočilo..."
 >
+
+<!-- Gumb -->
 <button id="sendBtn">
     Pošlji
-</button> <!-- Gumb za pošiljanje sporočila -->
+</button>
+
 <br><br>
+
 <a href="/logout">Odjavi</a>
+
 <script>
+
+/* Naloži sporočila */
 function loadMessages() {
-    $.get("/getMessages", function(data) { /* Funkcija, ki se izvede ob uspešnem GET zahtevku na /getMessages, data je odgovor, ki ga vrne server z vsemi sporočili v bazi */
-        let html = ""; /* Spremenljivka, ki bo vsebovala HTML kodo za prikaz sporočil, ki jo bomo generirali z JavaScriptom na podlagi podatkov, ki jih dobimo z getMessages funkcijo */
-        for (let i = 0; i < data.messages.length; i++) { /* Za vsak message v data.messages, ki je seznam sporočil, ki ga dobimo z getMessages funkcijo, generiramo HTML kodo za prikaz sporočila na chat strani */
-            let msg = data.messages[i]; /* Spremenljivka, ki vsebuje trenutno sporočilo, ki ga obdelujemo v zanki, da lahko dostopamo do avtorja in teksta sporočila, ki so shranjeni v bazi skupaj s sporočilom */
-            html += ` 
+
+    $.get("/getMessages", function(data) {
+
+        let html = "";
+
+        /* Gre skozi vsa sporočila */
+        for (let i = 0; i < data.messages.length; i++) {
+
+            let msg = data.messages[i];
+
+            html += `
             <div style="border:1px solid black; padding:10px; margin-bottom:10px;">
+
                 <b>${msg.author}</b>
+
                 <p>${msg.text}</p>
             `;
+
+            /* Če je uporabnik avtor */
             if (msg.author === "{{ uporabnik }}") {
+
                 html += `
                 <button
                     class="dynamicDeleteBtn"
@@ -57,52 +104,93 @@ function loadMessages() {
                 </button>
                 `;
             }
-            html += `</div>`; /* Za vsak message v data.messages, ki je seznam sporočil, ki ga dobimo z getMessages funkcijo, generiramo HTML kodo pro prikaz sporočila na chat strani, če je avtor sporočila enak trenutnemu uporabniku, prikažemo gumb za brisanje sporočila */
+
+            html += `</div>`;
         }
-        $("#chatBox").html(html); /* Nastavi HTML kodo elementa z id chatBox na generirano HTML kodo, da se prikažejo vsa sporočila na chat strani, ta funkcija se bo klicala vsake 2 sekundi, da dobimo nova sporočila bez osveževanja strani */
+
+        /* Prikaže HTML */
+        $("#chatBox").html(html);
     });
 }
-function sendMessage() { /* Funkcija, ki se izvede ob kliku na gumb za pošiljanje sporočila, da pošljemo novo sporočilo na chat stran brez osveževanja strani */
-    let text = $("#messageInput").val(); /* Pridobi tekst sporočila iz input elementa z id messageInput, da lahko pošljemo novo sporočilo na chat stran, text je tekst sporočila, ki ga uporabnik napiše v input elementu */
-    $.post( 
+
+/* Pošiljanje sporočila */
+function sendMessage() {
+
+    let text = $("#messageInput").val();
+
+    $.post(
+
         "/sendMessage",
+
         {
             text: text
         },
-        function(response) {
-            if (response.success) {
-                $("#messageInput").val("");
-                loadMessages();
-            }
-        }
-    ); /* Pošlje AJAX POST zahtevek na /sendMessage, da pošljemo novo sporočilo na chat stran bez osveževanja strani, text je tekst sporočila, ki ga uporabnik napiše v input elementu, function(response) je funkcija, ki se izvede ob uspešnem POST zahtevku, response je odgovor, ki ga vrne server z informacijami o uspehu pošiljanja sporočila, če je pošiljanje sporočila uspešno, počistimo input element in naložimo nova sporočila na chat stran bez osveževanja strani */
-}
 
-function deleteMessage(index) { /* Funkcija, ki se izvede ob kliku na gumb za brisanje sporočila, da izbrišemo sporočilo z chat strani bez osveževanja strani, index je indeks sporočila, ki ga želimo izbrisati, ki ga dobimo z data atributa gumba za brisanje sporočila */
-    $.post( /* Pošlje AJAX POST zahtevek na /deleteMessage, da izbrišemo sporočilo z chat strani bez osveževanja strani, index je indeks sporočila, ki ga želimo izbrisati, function(response) je funkcija, ki se izvede ob uspešnem POST zahtevku, response je odgovor, ki ga vrne server z informacijami o uspehu brisanja sporočila, če je brisanje sporočila uspešno, naložimo nova sporočila na chat stran bez osveževanja strani */
-        "/deleteMessage",
-        {
-            index: index
-        },
         function(response) {
+
             if (response.success) {
+
+                /* Počisti input */
+                $("#messageInput").val("");
+
+                /* Naloži nova sporočila */
                 loadMessages();
             }
         }
     );
 }
-$("#sendBtn").click(function() { /* Funkcija, ki se izvede ob kliku na gumb za pošiljanje sporočila, da pošljemo novo sporočilo na chat stran bez osveževanja strani */
+
+/* Brisanje sporočila */
+function deleteMessage(index) {
+
+    $.post(
+
+        "/deleteMessage",
+
+        {
+            index: index
+        },
+
+        function(response) {
+
+            if (response.success) {
+
+                loadMessages();
+
+            }
+        }
+    );
+}
+
+/* Klik na send */
+$("#sendBtn").click(function() {
+
     sendMessage();
+
 });
-$(document).on("click", ".deleteBtn", function() { /* Funkcija, ki se izvede ob kliku na gumb za brisanje sporočila, da izbrišemo sporočilo z chat strani bez osveževanja strani, ta funkcija se veže na dokument, da lahko obvladuje tudi dinamično generirane gumbe za brisanje sporočil, index je indeks sporočila, ki ga želimo izbrisati, ki ga dobimo z data atributa gumba za brisanje sporočila */
+
+/* Klik na delete */
+$(document).on("click", ".deleteBtn", function() {
+
     let index = $(this).data("id");
+
     deleteMessage(index);
+
 });
-$(document).on("click", ".dynamicDeleteBtn", function() { /* Funkcija, ki se izvede ob kliku na gumb za brisanje sporočila, da izbrišemo sporočilo z chat strani bez osveževanja strani, ta funkcija se veže na dokument, da lahko obvladuje tudi dinamično generirane gumbe za brisanje sporočil, index je indeks sporočila, ki ga želimo izbrisati, ki ga dobimo z data atributa gumba za brisanje sporočila */
+
+/* Dinamični delete gumbi */
+$(document).on("click", ".dynamicDeleteBtn", function() {
+
     let index = $(this).data("id");
+
     deleteMessage(index);
+
 });
-setInterval(loadMessages, 3000); /* Nastavi interval, da se funkcija loadMessages klice vsake 3 sekunde, da dobimo nova sporočila na chat strani bez osveževanja strani */
+
+/* Vsake 3 sekunde osveži chat */
+setInterval(loadMessages, 3000);
+
 </script>
+
 </body>
 </html>

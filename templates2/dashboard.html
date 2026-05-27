@@ -1,91 +1,171 @@
 <!DOCTYPE html>
 <html>
+
 <head>
+
     <title>Dashboard</title>
+
+    <!-- jQuery -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
 </head>
+
 <body>
+
 <h1>Socialna platforma</h1>
-<p>Prijavljen: {{ uporabnik }}</p> <!--Ime vzame iz sessiona in ga prikaže--> 
+
+<!-- Ime prijavljenega uporabnika -->
+<p>Prijavljen: {{ uporabnik }}</p>
+
 <h2>Nova objava</h2>
-<form action="/addPost" method="POST" enctype="multipart/form-data"> <!--Dodajanje nove objave, enctype="multipart/form-data" omogoča nalaganje datotek -->
-    <textarea 
-        name="text" 
+
+<!-- Forma za objavo -->
+<form
+    action="/addPost"
+    method="POST"
+    enctype="multipart/form-data"
+>
+
+    <!-- Besedilo objave -->
+    <textarea
+        name="text"
         placeholder="Napiši objavo..."
         required
     ></textarea>
+
     <br><br>
+
+    <!-- Dodajanje slike -->
     <input type="file" name="image">
+
     <br><br>
+
+    <!-- Gumb -->
     <button type="submit">
         Objavi
     </button>
+
 </form>
+
 <hr>
+
 <h2>Objave uporabnikov</h2>
-{% for post in posts %} <!--Za vsak post v posts, ki smo jih poslali iz app.py, ustvari div element z vsebino posta-->
+
+<!-- Gre skozi vse objave -->
+{% for post in posts %}
+
 <div style="border:1px solid black; padding:10px; margin-bottom:10px;">
+
+    <!-- Avtor -->
     <b>{{ post.author }}</b>
+
+    <!-- Besedilo -->
     <p>{{ post.text }}</p>
-    {% if post.image %} <!-- Če post vsebuje sliko, prikaži sliko -->
-        <img 
-            src="data:image/png;base64,{{ post.image }}" 
-            width="200"
-        > <!-- Prikaže sliko, ki je shranjena v bazi kot base64 string, src atribut vsebuje base64 string slike, da se slika prikaže na strani -->
-    {% endif %} <!-- Če post vsebuje sliko, prikaži sliko -->
+
+    <!-- Če obstaja slika -->
+    {% if post.image %}
+
+    <img
+        src="data:image/png;base64,{{ post.image }}"
+        width="200"
+    >
+
+    {% endif %}
+
     <br><br>
-    <button 
+
+    <!-- Like gumb -->
+    <button
         class="likeBtn"
         data-author="{{ post.author }}"
         data-index="{{ post.index }}"
-    > <!-- Gumb za lajkanje objave -->
+    >
+
         ❤️ Like ({{ post.likes }})
+
     </button>
-    {% if post.author == uporabnik %} <!-- Če je avtor posta enak trenutnemu uporabniku -->
-    <button 
+
+    <!-- Če je uporabnik avtor -->
+    {% if post.author == uporabnik %}
+
+    <!-- Gumb za brisanje -->
+    <button
         class="deleteBtn"
         data-index="{{ post.index }}"
     >
         Izbriši objavo
-    </button> <!-- Gumb za brisanje objave -->
-    {% endif %} <!-- Če je avtor posta enak trenutnemu uporabniku -->
+    </button>
+
+    {% endif %}
+
 </div>
-{% endfor %} <!-- Za vsak post v posts -->
+
+{% endfor %}
+
 <br>
+
 <a href="/logout">Odjavi</a>
+
 <script>
-$(".likeBtn").click(function() { /*Funkcija, ki se izvede ob kliku na gumb za lajkanje */
-    let author = $(this).data("author"); /* Pridobi avtorja posta iz data atributa gumba, da vemo kateri post želimo lajkat */
-    let index = $(this).data("index"); /* Pridobi indeks posta iz data atributa gumba, da vemo kateri post želimo lajkat, index je indeks posta v seznamu postov trenutnega uporabnika */
-    let btn = $(this); /* Shrani referenco na gumb, da lahko posodobimo besedilo gumba z novim številom lajkov po uspešnem lajkanju */
-    $.post("/likePost", /* Pošlje AJAX POST zahtevek na /likePost, da povečamo število lajkov za post, brez osveževanja strani */
+
+/* Like */
+$(".likeBtn").click(function() {
+
+    let author = $(this).data("author");
+
+    let index = $(this).data("index");
+
+    let btn = $(this);
+
+    $.post(
+        "/likePost",
+
         {
-            author: author, /* Pošlje avtorja posta v data atributu, da lahko najdemo pravilen post v bazi, author je username avtorja posta, ki ga lajkaš, da lahko najdemo pravilen post v bazi */
-            index: index /* Pošlje indeks posta v data atributu, da lahko povečamo število lajkov za pravilen post*/
+            author: author,
+            index: index
         },
-        function(response) { /* Funkcija, ki se izvede, če je zahtevek uspešen, response je odgovor, ki ga vrne server (success) */
+
+        function(response) {
+
             if (response.success) {
+
+                /* Posodobi število lajkov */
                 btn.text(
-                    "❤️ Like (" + response.likes + ")" /* Posodobi besedilo gumba z novim številom lajkov, response.likes je novo število lajkov, da lahko uporabnik vidi novo število lajkov na dashboardu brez osveževanja strani */
+                    "❤️ Like (" + response.likes + ")"
                 );
             }
         }
     );
 });
-$(".deleteBtn").click(function() { /* Funkcija, ki se izvede ob kliku na gumb za brisanje */
-    let index = $(this).data("index"); /* Pridobi indeks posta z data atributa gumba, da vemo kateri post želimo izbrisati*/
-    let postDiv = $(this).parent(); /* Shrani referenco na div element posta, da ga lahko odstranimo iz strani po uspešnem brisanju */
-    $.post("/deletePost", /* Pošlje AJAX POST zahtevek na /deletePost, da izbrišemo post iz baze, brez osveževanja strani */
+
+/* Brisanje objave */
+$(".deleteBtn").click(function() {
+
+    let index = $(this).data("index");
+
+    let postDiv = $(this).parent();
+
+    $.post(
+
+        "/deletePost",
+
         {
             index: index
         },
-        function(response) { /* Funkcija, ki se izvede, če je zahtevek uspešen, response je odgovor, ki ga vrne server (success) */
+
+        function(response) {
+
             if (response.success) {
-                postDiv.remove(); /* Odstrani div element posta iz strani, da se post odstrani z dashboarda brez osveževanja */
+
+                /* Odstrani objavo */
+                postDiv.remove();
+
             }
         }
     );
 });
+
 </script>
+
 </body>
 </html>
