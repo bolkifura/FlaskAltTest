@@ -152,6 +152,29 @@ $(".likeBtn").click(function() {
     );
 });
 
+/* Delete objave */
+$(".deleteBtn").click(function() {
+    let index = $(this).data("index");
+
+    $.post(
+
+        "/deletePost",
+
+        {
+            index: index
+        },
+
+        function(response) {
+
+            if (response.success) {
+
+                // Osveži stran
+                location.reload();
+            }
+        }
+    );
+});
+
 </script>
 
 </body>
